@@ -1,498 +1,623 @@
-# Insurance Policy Lifecycle Analysis
+# PoliSight – Insurance Policy Intelligence & Analytics Platform
 
-![Python](https://img.shields.io/badge/Python-3.13-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue) ![PowerBI](https://img.shields.io/badge/Power%20BI-Dashboard-yellow) ![ML](https://img.shields.io/badge/ML-scikit--learn-orange) ![Validated](https://img.shields.io/badge/Real_Data-Validated-brightgreen) ![Status](https://img.shields.io/badge/Status-Complete-green)
+![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql&logoColor=white)
+![Power BI](https://img.shields.io/badge/Power%20BI-Dashboard-F2C811?logo=powerbi&logoColor=black)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-scikit--learn-orange)
+![Status](https://img.shields.io/badge/Project-Portfolio%20Project-purple)
 
-> End-to-end data analytics project analyzing 3.6M rows of insurance policy data across the full policy lifecycle from acquisition to lapse, renewal, and claims settlement.
+**An end-to-end insurance analytics platform combining SQL, Python, machine learning, data governance, and business intelligence to transform synthetic insurance data into actionable business insights.**
+
+---
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Business Problem](#business-problem)
+- [Project Objectives](#project-objectives)
+- [Solution Architecture](#solution-architecture)
+- [Technology Stack](#technology-stack)
+- [Data Model](#data-model)
+- [SQL Analytics Layer](#sql-analytics-layer)
+- [Exploratory Data Analysis](#exploratory-data-analysis)
+- [Machine Learning and Predictive Analytics](#machine-learning-and-predictive-analytics)
+- [Data Calibration and Quality](#data-calibration-and-quality)
+- [Power BI Dashboard](#power-bi-dashboard)
+- [Business Insights and Use Cases](#business-insights-and-use-cases)
+- [Business Analysis and Documentation](#business-analysis-and-documentation)
+- [Project Structure](#project-structure)
+- [Installation and Setup](#installation-and-setup)
+- [Running the Pipeline](#running-the-pipeline)
+- [Data Governance and Quality Controls](#data-governance-and-quality-controls)
+- [Limitations and Future Improvements](#limitations-and-future-improvements)
+- [Skills Demonstrated](#skills-demonstrated)
+- [Author](#author)
 
 ---
 
 ## Project Overview
 
-I spent 4 years at Cognizant working on insurance data - claims performance dashboards, SLA tracking, loss ratio reporting for BFSI clients. This project is my attempt to build the kind of analysis I was doing at work, end-to-end, from scratch, without a team or existing infrastructure.
+PoliSight is an insurance policy intelligence and analytics platform designed to demonstrate how structured data engineering, analytical SQL, exploratory data analysis, machine learning, and business intelligence can support insurance business decisions.
 
-The goal was to answer questions a Head of Analytics at a non-life insurer would actually care about - lapse drivers, pricing adequacy, CLV by segment, agent productivity. Not just "here's a dashboard," but here's what the data says and what you should do about it.
-Domain: Insurance (Non-Life) | Scale: 3.6M rows, 8 tables 
+The project follows an end-to-end analytical workflow:
 
----
+1. Generate synthetic insurance datasets using Python.
+2. Organize the data into a relational PostgreSQL database.
+3. Develop SQL queries, views, aggregations, and analytical transformations.
+4. Perform exploratory data analysis to identify trends and patterns.
+5. Apply machine learning techniques to investigate customer behavior and insurance outcomes.
+6. Present analytical findings through Power BI dashboards.
+7. Document business requirements, user acceptance testing, data governance, and data definitions.
 
-## Business Questions Answered
+The platform focuses on important insurance business areas, including customer retention, policy renewals, claims experience, premium performance, risk segmentation, and customer lifetime value.
 
-| # | Business Question | Insight |
-|---|---|---|
-| 1 | What is the policy lapse rate trend over time? | Stable 17.7% lapse rate across 2015–2024, driven by income and risk profile |
-| 2 | Which states have the highest loss ratios? | 68–71% range across all states within IRDAI benchmark of 70–110% |
-| 3 | What does the CLV distribution look like? | 74% positive CLV, 26% negative, avg ₹86K |
-| 4 | Which product lines renew best? | Life 47%, Health 42%, Motor 39%, Travel 37% |
-| 5 | Who are the top performing agents? | Top agents sell 1,050–1,095 policies with ₹3.1Cr+ premium written |
-| 6 | Is pricing adequate across product lines? | Motor highest loss ratio at 86%, Life lowest at 55% |
-| 7 | How are customers segmented by demographics? | 2L–5L income bracket dominates (17K customers); lapse rate decreases monotonically with income |
+**Project Repository:** [PoliSight – Insurance Analytics](https://github.com/Prathmesh717/polisight-insurance-analytics)
 
 ---
 
-## Tech Stack
+## Business Problem
 
-| Layer | Technology |
+Insurance companies manage large volumes of information relating to customers, agents, products, policies, premiums, claims, and renewals.
+
+However, analyzing these datasets independently can make it difficult to identify relationships between customer behavior, policy performance, claims experience, and business outcomes.
+
+PoliSight addresses this analytical challenge through a centralized data model and an integrated analytics workflow.
+
+The project explores questions such as:
+
+- Which customer segments demonstrate higher policy retention?
+- How do claims and premium amounts vary across insurance products?
+- Which factors may be associated with policy lapses?
+- How can customers be segmented based on their characteristics and behavior?
+- How can customer lifetime value be analyzed?
+- What patterns can support better renewal and pricing decisions?
+- How can SQL-based analytics be transformed into management dashboards?
+
+The objective is to demonstrate a structured, data-driven approach to answering these business questions.
+
+---
+
+## Project Objectives
+
+| Area | Objective |
 |---|---|
-| Data Generation | Python (Faker, pandas, numpy) |
-| Database | PostgreSQL 18 |
-| SQL Analytics | 7 PostgreSQL views with pre-aggregation CTEs |
-| Visualization | Power BI Desktop (7 pages, Import mode) |
-| DAX | 5 calculated measures |
-| Machine Learning | scikit-learn (KMeans, Logistic Regression, Random Forest, Linear Regression) |
-| Version Control | Git + GitHub |
-| IDE | VS Code + SQLTools |
+| Data Engineering | Generate and organize structured synthetic insurance datasets |
+| Database Management | Build a relational PostgreSQL data model |
+| SQL Analytics | Develop analytical queries, views, CTEs, and aggregations |
+| Exploratory Analysis | Identify trends, distributions, and relationships |
+| Machine Learning | Explore classification, clustering, and regression techniques |
+| Business Intelligence | Develop dashboards for insurance performance analysis |
+| Data Governance | Define data quality, ownership, and governance controls |
+| Business Analysis | Translate business problems into requirements and acceptance criteria |
+| Quality Assurance | Prepare test scenarios and user acceptance testing documentation |
 
 ---
 
-## Architecture
+## Solution Architecture
 
-```
-Python (Faker + pandas)
-        ↓
-  Synthetic data generation
-  (500K policies, 50K customers,
-   500 agents, 2.7M premiums)
-        ↓
-  PostgreSQL 18
-  (star schema, 8 tables, 3.6M rows)
-        ↓
-  7 PostgreSQL views
-  (pre-aggregated analytics layer)
-        ↓
-  Power BI Desktop (Import mode)
-  (7 pages, 5 DAX measures, cross-page slicers)
-        ↓
-  Python ML Notebook
-  (KMeans, Logistic Regression, Random Forest,
-   Linear Regression)
-```
+The following diagram represents the project's intended analytical workflow.
 
----
+```mermaid
+flowchart TD
+    A["Synthetic Data Generation<br/>(Python + Faker)"] --> B[("Relational Data Model<br/>(PostgreSQL)")]
+    B --> C["SQL Analytics Layer<br/>(Views, CTEs, Aggregations)"]
+    C --> D["Exploratory Data Analysis"]
+    C --> E["Power BI Dashboard"]
+    D --> F["Machine Learning<br/>(Clustering, Classification, Regression)"]
+    F --> G["Business Insights<br/>(Retention, Claims, CLV, Renewals, Pricing)"]
 
-## Database Schema
+    classDef source fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef database fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef analytics fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef output fill:#f3e8ff,stroke:#9333ea,color:#581c87
 
-| Table | Rows | Description |
-|---|---|---|
-| dim_date | 3,653 | Date dimension (2015-2024) |
-| dim_customers | 50,000 | Customer demographics |
-| dim_agents | 500 | Agent and channel info |
-| dim_products | 13 | Product catalog |
-| fact_policies | 500,000 | Policy lifecycle events |
-| fact_premiums | 2,787,821 | Premium payment records |
-| fact_claims | 263,750 | Claims and settlements |
-| fact_renewals | 273,107 | Renewal events and CLV |
-
-### Relationships (Star Schema)
-```
-dim_customers ──→ fact_policies ←── dim_products
-dim_agents    ──→ fact_policies ←── dim_date
-                       ↓
-              fact_claims
-              fact_premiums
-              fact_renewals
+    class A source
+    class B database
+    class C,D,F analytics
+    class E,G output
 ```
 
----
+### Workflow Explanation
 
-## PostgreSQL Views
-
-All 7 views use pre-aggregated CTEs to eliminate fan-out join errors - a common issue when joining multiple fact tables to a single policy record.
-
-| View | Purpose |
+| Layer | Description |
 |---|---|
-| vw_lapse_trend | Monthly lapse rate % and policy count 2015-2024 |
-| vw_loss_ratio_state | Loss ratio by state using correct separate-aggregate method |
-| vw_clv | Customer lifetime value estimates per customer |
-| vw_renewal_behavior | Renewal rates and premium change by product line |
-| vw_pricing_adequacy | Pricing status by product line and year |
-| vw_agent_performance | Agent KPIs - policies sold, renewal rate, lapse rate, premium |
-| vw_customer_segments | Customer segmentation by income, gender, education, marital status |
+| Data Generation | Synthetic insurance data generated using Python and Faker |
+| Database | Structured relational storage using PostgreSQL |
+| SQL Analytics | Business-oriented queries, views, CTEs, and aggregations |
+| EDA | Statistical exploration and visualization of insurance data |
+| Machine Learning | Predictive and segmentation analysis |
+| Business Intelligence | Power BI reporting and dashboard development |
+| Business Insights | Interpretation of analytical outputs for decision support |
+
+---
+
+## Technology Stack
+
+| Category | Technologies |
+|---|---|
+| Programming | Python 3.11 |
+| Database | PostgreSQL 17 |
+| Data Manipulation | Pandas, NumPy |
+| Data Generation | Faker |
+| Data Visualization | Matplotlib, Seaborn |
+| Machine Learning | Scikit-learn |
+| Statistical Analysis | Python statistical and analytical libraries |
+| Query Language | SQL |
+| BI and Reporting | Microsoft Power BI |
+| Documentation | Markdown |
+| Version Control | Git and GitHub |
+
+---
+
+## Data Model
+
+PoliSight uses a relational database consisting of eight primary tables.
+
+| Table | Purpose |
+|---|---|
+| `dim_date` | Date dimension for time-based analysis |
+| `dim_customers` | Customer demographic and profile information |
+| `dim_agents` | Insurance agent information |
+| `dim_products` | Insurance product details |
+| `fact_policies` | Policy-level information |
+| `fact_premiums` | Premium payment information |
+| `fact_claims` | Insurance claim information |
+| `fact_renewals` | Policy renewal and lapse information |
+
+### Data Model Design
+
+The database separates descriptive information from transactional and business-event information.
+
+- Dimension tables provide descriptive attributes.
+- Fact tables capture policy, premium, claims, and renewal activity.
+- Primary and foreign keys establish relationships between relevant entities.
+- Database constraints support structural data integrity.
+
+The detailed table and column definitions are documented in [`docs/data_dictionary.md`](docs/data_dictionary.md).
+
+---
+
+## SQL Analytics Layer
+
+SQL is used to transform relational insurance data into business-oriented analytical outputs.
+
+The project includes:
+
+- Data aggregation and summarization.
+- Common Table Expressions (CTEs).
+- Joins across dimension and fact tables.
+- Customer and policy-level analysis.
+- Premium and claims analysis.
+- Renewal and lapse analysis.
+- Analytical views designed for reporting.
+
+### SQL Deliverables
+
+| File | Description |
+|---|---|
+| `sql/01_create_schema.sql` | Creates the relational database schema |
+| `sql/02_eda_queries.sql` | Contains exploratory and analytical SQL queries |
+| `sql/03_powerbi_views.sql` | Defines reporting views for Power BI |
+
+### Example Analytical Questions
+
+- What is the premium distribution across insurance products?
+- How does claims experience vary across customer segments?
+- Which policies have renewal or lapse outcomes?
+- How do policy counts and premium amounts change over time?
+- What is the relationship between customer characteristics and insurance outcomes?
+
+---
+
+## Exploratory Data Analysis
+
+Exploratory Data Analysis is used to understand the structure, distribution, and relationships within the synthetic insurance datasets.
+
+The analysis focuses on:
+
+- Customer demographics.
+- Policy distribution.
+- Product-level performance.
+- Premium distributions.
+- Claims frequency and amounts.
+- Renewal and lapse patterns.
+- Risk score distributions.
+- Customer lifetime value.
+
+EDA helps identify data patterns, potential quality issues, and analytical opportunities before applying machine learning techniques.
+
+---
+
+## Machine Learning and Predictive Analytics
+
+The project explores machine learning methods to investigate customer segmentation, policy behavior, and insurance-related outcomes.
+
+| Technique | Analytical Purpose |
+|---|---|
+| Clustering | Explore customer segments based on selected characteristics |
+| Classification | Investigate policy lapse and renewal-related outcomes |
+| Regression | Explore customer lifetime value estimation |
+| Feature Analysis | Examine relationships between customer and policy attributes |
+| Model Evaluation | Assess model performance using appropriate evaluation metrics |
+
+### Analytical Focus Areas
+
+**1. Customer Segmentation**
+
+Explore customer groups based on selected demographic, policy, and behavioral characteristics.
+
+**2. Policy Lapse Analysis**
+
+Investigate factors associated with policy lapse behavior using classification techniques.
+
+**3. Customer Lifetime Value**
+
+Explore regression-based approaches for estimating customer lifetime value while avoiding target leakage.
+
+**4. Risk Analysis**
+
+Examine the relationship between customer characteristics, policy attributes, and generated risk scores.
+
+### Model Evaluation
+
+Depending on the task, the analysis considers metrics such as:
+
+- Accuracy
+- Precision
+- Recall
+- F1-score
+- ROC-AUC
+- R²
+- Mean Absolute Error (MAE)
+
+The metrics must be interpreted in the context of the synthetic dataset and the assumptions used to generate it.
+
+---
+
+## Data Calibration and Quality
+
+PoliSight evolved through two development iterations to address data-generation issues, improve analytical reliability, and reduce misleading model results.
+
+The following table summarizes the historical comparison between the original and calibrated versions.
+
+| Issue | v1 (Original) | v2 (Calibrated) | Fix |
+|---|---|---|---|
+| Loss ratio | 700%+ | 69.7% | Claim amounts scaled relative to annual premium rather than sum insured |
+| Lapse signal | Random signal (AUC 0.50) | Risk-driven signal (AUC 0.66) | `is_lapsed` derived from a logistic probability function |
+| CLV leakage | R² = 1.0, MAE = ₹0 | R² = 0.21, MAE = ₹32,927 | Removed premium-related features that mathematically defined CLV |
+| Risk score | Flat 50.0 | 65.2 ± 13.5 | Score variation introduced using age, income, product line, and tenure |
+| SQL views | Fan-out join issue | Pre-aggregated CTEs | Premium and claims data aggregated separately before joining |
+
+**Important:** These figures are historical development results from earlier project analysis. They should not be interpreted as independently reproduced or currently verified metrics until the corresponding pipeline has been executed and the outputs have been validated.
+
+### Key Improvements
+
+- Improved the relationship between generated claims and annual premium.
+- Introduced a risk-driven lapse-generation approach.
+- Addressed target leakage in the CLV modelling workflow.
+- Improved risk score variation.
+- Reduced SQL aggregation errors caused by joining multiple fact tables without pre-aggregation.
+
+This calibration process demonstrates the importance of data validation, feature selection, SQL reconciliation, and model evaluation in analytical projects.
 
 ---
 
 ## Power BI Dashboard
 
-7-page interactive dashboard with slicers (Year, State, Product Line) synced across pages.
+Power BI is used to present insurance-related analytical information in a business-friendly reporting format.
 
-> 📊 **[Download Power BI Dashboard (.pbix)](https://drive.google.com/file/d/1rVKOPWMcvml6o1ZnCWt7i1wANQRfDP22/view?usp=drive_link)**
-> *(198MB — hosted on Google Drive due to GitHub's 100MB file size limit)*
+The dashboard screenshots retained in the repository are available in the following directory:
 
-### Page 1 — Lapse Trend
-![Lapse Trend](reports/v2_calibrated/screenshots/page1_lapse_trend.png)
-Monthly lapse rate trend 2015-2024 with total policies overlay. Rate fluctuates 16-19%, averaging 17.7%.
+`reports/v2_calibrated/screenshots/`
 
-### Page 2 — Loss Ratio by State
-![Loss Ratio](reports/v2_calibrated/screenshots/page2_loss_ratio.png)
-Horizontal bar chart showing loss ratio per state with break-even reference line. Range: 68–71% across all 15 states.
+### Dashboard Previews
 
-### Page 3 — CLV Distribution
-![CLV](reports/v2_calibrated/screenshots/page3_clv_distribution.png)
-Donut chart - 25.86% negative CLV, 67.71% above ₹30K. Avg CLV ₹86.39K.
+**Insurance Analytics Dashboard**
 
-### Page 4 — Overview
-![Overview](reports/v2_calibrated/screenshots/page4_overview.png)
-KPI cards: Lapse Rate 17.68%, Renewal Rate 40.67%, Avg Loss Ratio 64.15, Avg CLV ₹13.22K. Renewal rate by product line bar chart.
+![Insurance Analytics Dashboard](reports/v2_calibrated/screenshots/dashboard_overview.png)
 
-### Page 5 — Agent Performance Leaderboard
-![Agents](reports/v2_calibrated/screenshots/page5_agent_leaderboard.png)
-Top 20 agents by total premium written with conditional formatting on renewal rate. Top agent: Mitesh Kibe, ₹3.16Cr, 40.23% renewal.
+**Claims and Premium Analysis**
 
-### Page 6 — Pricing Adequacy
-![Pricing](reports/v2_calibrated/screenshots/page6_pricing_adequacy.png)
-Pricing adequacy matrix + loss ratio by product line + risk score vs loss ratio scatter. Motor highest at 86%, Life lowest at 55%.
+![Claims and Premium Analysis](reports/v2_calibrated/screenshots/claims_analysis.png)
 
-### Page 7 — Customer Segmentation
-![Segmentation](reports/v2_calibrated/screenshots/page7_customer_segmentation.png)
-Income treemap + customer count by income + lapse rate by education/marital status + gender distribution.
+**Customer and Renewal Analysis**
+
+![Customer and Renewal Analysis](reports/v2_calibrated/screenshots/customer_renewal_analysis.png)
+
+*Note: Update the image filenames above if the actual screenshot filenames in the repository differ. The Power BI PBIX file is not included in this repository.*
+
+### Dashboard Analysis Areas
+
+- Policy and customer distribution.
+- Premium performance.
+- Claims analysis.
+- Renewal and lapse patterns.
+- Customer segmentation.
+- Insurance portfolio performance.
 
 ---
 
-## DAX Measures
+## Business Insights and Use Cases
 
-```dax
-Lapse Rate % =
-DIVIDE(
-    CALCULATE(COUNTROWS('public fact_policies'),
-    'public fact_policies'[is_lapsed] = TRUE()),
-    COUNTROWS('public fact_policies')
-) * 100
+The platform is designed to support analysis across several insurance business functions.
 
-Renewal Rate % =
-DIVIDE(
-    CALCULATE(COUNTROWS('public fact_renewals'),
-    'public fact_renewals'[renewed] = TRUE()),
-    COUNTROWS('public fact_renewals')
-) * 100
-
-Avg Loss Ratio =
-DIVIDE(
-    SUM('public fact_claims'[approved_amount]),
-    SUM('public fact_premiums'[amount_paid])
-) * 100
-
-Avg CLV = AVERAGE('public fact_renewals'[clv_at_renewal])
-
-Inadequate Pricing Rate % =
-DIVIDE(
-    CALCULATE(SUM('public vw_pricing_adequacy'[policy_count]),
-    'public vw_pricing_adequacy'[pricing_status] = "Inadequate"),
-    SUM('public vw_pricing_adequacy'[policy_count])
-) * 100
-```
-
----
-
-## ML Analysis
-
-**Script:** `notebooks/05_ml_analysis_v2.py`
-
-### Results Summary
-
-| Technique | Purpose | Result |
-|---|---|---|
-| KMeans (K=4) | Customer segmentation | Silhouette score: 0.1944 - 4 segments by risk/tenure |
-| Logistic Regression | Lapse prediction | ROC-AUC: **0.6484** - 62% recall on lapsed policies |
-| Random Forest | Lapse prediction | ROC-AUC: **0.6642** - top feature: income bracket |
-| Linear Regression | CLV prediction | R²: **0.2106**, MAE: ₹32,927 |
-
-### Model Selection Rationale
-
-Why these models for these questions:
-
-Lapse Prediction → Classification problem (binary outcome)
-  - Logistic Regression chosen first: interpretable coefficients 
-    tell us which features drive lapse directly actionable 
-    for retention teams. Coefficient on income_enc = -312 means 
-    higher income bracket = lower lapse probability.
-  - Random Forest added: captures non-linear interactions 
-    (e.g. high risk score + low income = disproportionately 
-    high lapse) that LR misses. RF AUC 0.6642 > LR 0.6484 
-    confirms non-linearity exists.
-  - I did NOT use XGBoost or neural networks as it is unnecessary 
-    complexity for a 6-feature model with 500K rows where 
-    interpretability matters more than marginal AUC gains.
-
-Customer Segmentation → KMeans chosen over DBSCAN/hierarchical
-  - KMeans: business needs a fixed number of actionable segments 
-    (4 = Low Risk, High Value, At Risk, Mid Tier). 
-  - DBSCAN would find arbitrary shapes but give variable K that is 
-    unusable for a business team that needs stable segments.
-  - Silhouette score 0.19 is low but expected as insurance 
-    customers don't form hard clusters. Directional value remains.
-
-CLV Prediction → Linear Regression chosen over tree models
-  - CLV is a continuous outcome with a known economic formula. 
-    Linear Regression gives interpretable coefficients i.e
-    policy_tenure_months coefficient of 2,213 means each 
-    additional month of tenure adds ₹2,213 to predicted CLV. 
-    Directly usable by pricing teams.
-  - R² of 0.21 is honest as stochastic claims events dominate 
-    CLV variance. A Random Forest would overfit to training 
-    data and give false confidence. Linear Regression 
-    is the right tool for an explainable baseline.
-
-
-### Model Notes
-
-**Lapse Prediction:** Both models significantly outperform random baseline (AUC 0.50). Logistic Regression uses `class_weight='balanced'` to handle the 18%/82% class imbalance. Random Forest constrained with `max_depth=10` and `min_samples_leaf=50` to prevent overfitting. Top predictive feature: `income_enc` confirming that affordability is the primary lapse driver.
-
-**CLV Regression:** R² of 0.21 is expected. CLV is primarily driven by stochastic claims events which are not predictable from demographics alone. The model captures the structural component (tenure, risk score, product line) explaining ~21% of variance, consistent with actuarial literature on demographic CLV models.
-
-**KMeans:** Silhouette score of 0.19 reflects soft cluster boundaries as realistic in insurance where customers don't segment sharply. Cluster 3 clearly separates on tenure (32 months vs 14-15 months for others), indicating a committed long-tenure segment.
-
-### Charts Generated (reports/v2_calibrated/)
-
-| File | Description |
+| Business Area | Potential Application |
 |---|---|
-| 06_policy_distributions.png | Premium, risk score, tenure distributions |
-| 07_lapse_by_income.png | Lapse rate by income bracket (29.3% → 5.5%) |
-| 09_clv_analysis.png | CLV distribution histogram + segment pie |
-| 10_elbow_silhouette.png | Elbow method + silhouette score for K selection |
-| 11_kmeans_clusters.png | Customer cluster scatter + size bar chart |
-| 12_lapse_prediction.png | ROC curves (LR vs RF) + feature importance |
-| 14_clv_regression.png | Actual vs predicted CLV + regression coefficients |
+| Customer Retention | Identify customer groups associated with higher lapse risk |
+| Claims Management | Analyze claims frequency, amounts, and patterns |
+| Premium Analysis | Understand premium distribution across products |
+| Customer Lifetime Value | Explore customer value and contribution |
+| Renewal Management | Analyze renewal and lapse outcomes |
+| Risk Segmentation | Group customers based on selected risk characteristics |
+| Pricing Analysis | Explore relationships between product, customer, and premium attributes |
+
+These are analytical use cases supported by the project design, not claims of production deployment or proven business impact.
 
 ---
 
-## Key Findings
+## Business Analysis and Documentation
 
-### 1. Lapse Rate
-- **17.7%** overall lapse rate, stable across 2015–2024
-- Lapse rate decreases monotonically with income: **<2L: 29.3% → 25L+: 5.5%**
-- Affordability (`income_bracket`) is the strongest lapse predictor (top ML feature)
-- Motor and Travel product lines show higher lapse propensity than Life
+PoliSight includes business analysis and quality documentation alongside its technical implementation.
 
-### 2. Loss Ratio
-- Portfolio loss ratio: **69.7%** within IRDAI non-life benchmark range
-- Motor highest at **86%**, Life lowest at **55%**
-- All 15 states within 68-71% in tight range reflecting uniform underwriting
-- Claim frequency: 39.3% of non-cancelled policies filed at least one claim
+This demonstrates how an analytics solution can be planned, specified, tested, and governed rather than developed only as a collection of scripts and dashboards.
 
-### 3. Customer Lifetime Value
-- **74% positive CLV**, 26% negative CLV
-- Average CLV: **₹86,394** across renewal portfolio
-- CLV formula: `premiums_collected − claims_paid − acquisition_cost (15% of annual premium)`
-- Negative CLV concentrated in high-risk, low-income, Motor/Travel segments
+| Document | Purpose |
+|---|---|
+| [Business Requirements Document (BRD)](docs/BRD.md) | Defines the business problem, scope, requirements, stakeholders, KPIs, and acceptance criteria |
+| [User Acceptance Testing Plan](docs/UAT_Plan.md) | Defines UAT scenarios, expected outcomes, test execution, and acceptance conditions |
+| [Data Governance Checklist](docs/Governance_Checklist.md) | Tracks governance controls, implementation status, and supporting evidence |
+| [Data Dictionary](docs/data_dictionary.md) | Documents tables, columns, relationships, definitions, and data quality rules |
 
-### 4. Renewal Behavior
-- Life renews best at **47%**, Travel lowest at **37%**
-- Renewal rate reflects only matured policies (Renewed/Lapsed/Expired status)
-- Active policies excluded as they have not yet reached renewal date
+### Business Analysis Deliverables
 
-### 5. Agent Performance
-- Top agent (Mitesh Kibe): 1,081 policies, ₹3.16Cr premium, 40.23% renewal
-- Renewal rates range **37-47%** among top 20 agents
-- Digital and Direct channels dominate top performers
+- Business problem definition.
+- Functional and non-functional requirements.
+- Business rules and KPI definitions.
+- Requirement traceability.
+- Acceptance criteria.
+- UAT test scenarios.
+- Data governance controls.
+- Data dictionary and field definitions.
 
-### 6. Pricing Adequacy
-- Motor: **86%** loss ratio - highest risk, highest claims
-- Life: **55%** loss ratio - lowest claims frequency, most profitable
-- Risk score vs loss ratio scatter confirms positive correlation across product lines
-
-### 7. Customer Segmentation
-- **2L–5L income bracket** is the largest segment (17K customers, 35% of portfolio)
-- Lapse rate by income shows clear gradient as affordability is a key retention lever
-- Education and marital status show uniform lapse rates (~15%) as they weren't included as lapse drivers in the synthetic model
-
----
-
-## Data Calibration: v1 → v2 (Lessons Learned)
-
-I'll be upfront about what went wrong with v1 and how I fixed it because this is the part that actually taught me the most.
-The first version looked complete. Star schema loaded, views running, dashboard built, ML notebook done. Then I ran the model evaluation and got R² = 1.0 and MAE = ₹0 on the CLV regression. That's not a good model, that's a broken one. Turned out the features I'd used to predict CLV mathematically defined it. I was training a model to predict X using X. Classic data leakage.
-That sent me back through the whole pipeline. Once I started looking properly, I found three more problems: the loss ratio was 700%+ because I'd scaled claim amounts against sum insured instead of annual premium. The lapse model was getting AUC 0.50 (coin flip) because is_lapsed was generated randomly with no relationship to any feature. And the risk score was a flat 50.0 for every policy because I'd used random.uniform without any conditioning.
-After days of work, the data was telling me nothing useful.
-The v2 rebuild injected real statistical relationships. Risk score is now a function of age, income, product line and tenure. Lapse probability follows a logistic function driven by risk score and income. CLV is calculated as premiums collected minus claims paid minus acquisition cost and not derived from premium columns. Claim amounts are scaled to annual premium, bringing the loss ratio to 69.7%.
-The original charts are in reports/v1_uncalibrated/ if you want to see the before/after.
-
-### v1 → v2 Calibration (Key Fixes)
-
-| Issue | v1 (Original) | v2 (Calibrated) | Fix |
-|---|---|---|---|
-| Loss ratio | 700%+ | 69.7% | Claim amounts scaled to annual_premium × factor, not sum_insured |
-| Lapse signal | Random (AUC 0.50) | Risk-driven (AUC 0.66) | is_lapsed derived from logistic probability function |
-| CLV leakage | R²=1.0, MAE=₹0 | R²=0.21, MAE=₹32,927 | Removed premium columns that mathematically defined CLV |
-| Risk score | Flat 50.0 | 65.2 ± 13.5 | Driven by age, income, product line, tenure |
-| Lapse by income | Uniform ~20% | 29.3% → 5.5% | Income-weighted lapse probability |
-| SQL views | Fan-out join bug | Pre-aggregated CTEs | Separate CTEs for premiums and claims before joining |
-
-The `reports/v1_uncalibrated/` folder preserves all original charts for comparison. This iterative debugging process included identifying root causes, applying targeted fixes, and validating against benchmarks mirrors real-world data engineering work.
-
----
-
-## Real Data Validation
-
-To address the limitations of synthetic data, key distributions in this project were
-cross-validated against two real-world insurance datasets sourced from Kaggle, both
-stored in `data/raw/`.
-
-### Datasets Used for Validation
-
-| Dataset | Source | Rows | Purpose |
-|---|---|---|---|
-| `insurance_claims.csv` | Kaggle Auto Insurance Claims | 1,000 | Premium, claim amount, fraud rate benchmarks |
-| `insurance_dataset.csv` | Kaggle Insurance Dataset | 13,000 | Age, income, claim amount distributions |
-
-### Validation Results
-
-| Metric | Real Data | Synthetic (v2) | Assessment |
-|---|---|---|---|
-| Avg annual premium | $1,256 (≈ ₹1.05L USD-adjusted) | ₹26,259 | Directionally consistent. Indian premiums lower than US due to lower sum insured |
-| Age range | 19-64 (claims), 18-102 (dataset) | 18-70 | Aligned |
-| Avg claim amount | $52,762 (≈ ₹44L) per claim | ₹28,400 per claim | US claims higher as expected given higher vehicle/medical costs |
-| Fraud rate | 24.7% of claims flagged | Not modelled in Project 1 | Feeds directly into Project 4 (Fraud Detection) |
-| Claim frequency | 100% (all rows are claims) | 39.3% of policies | Real dataset is claims-only and not comparable to policy-level frequency |
-
-### Key Observations
-
-- **Premium calibration:** Indian non-life premiums are structurally lower than US benchmarks
-  due to lower vehicle valuations, regulated IRDAI tariffs, and lower medical costs.
-  The synthetic premium range of ₹4,000–₹70,000 aligns with IRDAI published data for
-  motor and health segments.
-
-- **Claim severity:** The real dataset shows average claims of ~$52K (US auto),
-  significantly higher than the synthetic ₹28K. This is expected as US liability limits
-  and medical costs are 3-5x Indian equivalents. Synthetic claim amounts were
-  calibrated to IRDAI loss ratio benchmarks (70-110%) rather than absolute US figures.
-
-- **Fraud signal preserved:** The 24.7% fraud rate in the real claims data is a strong
-  signal that will be used as the primary target variable in Project 4 Insurance
-  Claims Fraud Detection. The real dataset provides ground truth labels that synthetic
-  data cannot replicate.
-
-- **What real data validated:** The synthetic data's loss ratio (69.7%), lapse rate
-  (17.7%), and income-driven lapse gradient were benchmarked against IRDAI annual
-  reports and validated to be within realistic ranges and not against this specific
-  dataset, but against published industry aggregates.
-
-### Why Synthetic Data Was Used
-
-Real Indian non-life insurance policy data at transaction level is not publicly
-available as insurers treat policy-level data as proprietary. The synthetic approach
-mirrors standard actuarial practice where simulated data is used for model development
-before production deployment. The calibration process (documented in the
-Data Calibration: v1 → v2 Notes section) ensured distributions match published IRDAI benchmarks
-rather than being arbitrarily generated.
-
----
-
-## Limitations
-
-- **Synthetic data:** Real Indian non-life policy data at transaction level isn't publicly available as insurers treat it as proprietary. I used Faker to generate 3.6M rows and calibrated the distributions against IRDAI benchmarks, but it's not the same as working with actual messy production data. Project 2 uses a real Kaggle ecommerce-retail dataset specifically to address this.
-- **Education/marital lapse uniformity:** I built lapse probability as a function of income, risk score, product line and tenure. That means education and marital status show uniform lapse rates (~15%) across all categories not because they're irrelevant in reality, but because I didn't include them as drivers. A real insurer's lapse model would test these.
-- **Renewal rate (40.7%):** It is lower than the 55-65% industry benchmark, but the denominator only includes policies that have actually reached their renewal date (status: Renewed, Lapsed, or Expired). The 200K+ active policies are excluded. If you include active policies as "not yet renewed," the rate looks artificially depressed.
-- **CLV R² (0.21):** CLV is primarily driven by whether a claim occurred and claims are stochastic. Demographic and risk features explain the structural component (~21% of variance), which is consistent with what actuarial literature says about demographic-only CLV models. A higher R² here would have meant something was wrong, not right.
-
----
-
-## How to Run
-
-### Prerequisites
-- Python 3.13 (Anaconda)
-- PostgreSQL 18
-- Power BI Desktop
-
-### Setup
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/ChandanRamSaiiG21/insurance-policy-analysis.git
-cd insurance-policy-analysis
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Create PostgreSQL database
-createdb insurance_policy_db
-
-# 4. Run schema
-psql -U postgres -d insurance_policy_db -f sql/01_create_schema.sql
-
-# 5. Generate synthetic data (~15 mins)
-python notebooks/03_generate_data_v3_final.py
-
-# 6. Create views
-psql -U postgres -d insurance_policy_db -f sql/03_powerbi_views.sql
-
-# 7. Run EDA
-python notebooks/04_eda_visualizations_v2.py
-
-# 8. Run ML analysis
-python notebooks/05_ml_analysis_v2.py
-```
-
-### Power BI
-1. Download the `.pbix` from [Google Drive](https://drive.google.com/file/d/1rVKOPWMcvml6o1ZnCWt7i1wANQRfDP22/view?usp=drive_link)
-2. Open in Power BI Desktop
-3. Update the PostgreSQL connection string with your credentials
-4. Click Home → Refresh
+The documentation reflects the current project scope and evidence available in the repository. Test execution and governance statuses should be updated as additional validation is completed.
 
 ---
 
 ## Project Structure
 
-```
-insurance-policy-analysis/
-├── data/
-│   ├── raw/                         # Raw source data (COIL 2000, Kaggle)
-│   └── processed/                   # Processed datasets
+```text
+polisight-insurance-analytics/
+│
+├── docs/
+│   ├── BRD.md
+│   ├── UAT_Plan.md
+│   ├── Governance_Checklist.md
+│   └── data_dictionary.md
+│
 ├── notebooks/
-│   ├── 01_combine_coil.py           # UCI COIL 2000 data preparation
-│   ├── 02_inspect_all.py            # Raw data inspection
-│   ├── 03_generate_data_v3_final.py # Calibrated synthetic data generator
-│   ├── 03a_diagnose_loss_ratio.py   # Loss ratio diagnostic script
-│   ├── 03b_patch_claims.py          # Claims calibration iteration 1
-│   ├── 03c_patch_claims_final.py    # Claims calibration iteration 2
-│   ├── 04_eda_visualizations_v2.py  # EDA charts (v2 calibrated)
-│   └── 05_ml_analysis_v2.py        # ML analysis — clustering, classification, regression
-├── sql/
-│   ├── 01_create_schema.sql         # Database schema + indexes
-│   ├── 02_eda_queries.sql           # Ad-hoc analysis queries
-│   └── 03_powerbi_views.sql        # 7 Power BI views
+│   ├── 01_*.py
+│   ├── 02_*.py
+│   ├── 03_generate_data_v3_final.py
+│   ├── 04_eda_visualizations_v2.py
+│   ├── 05_ml_analysis_v2.py
+│   └── ...
+│
 ├── reports/
-│   ├── v1_uncalibrated/            # Original charts (pre-calibration)
-│   │   ├── screenshots/            # Original Power BI screenshots
-│   │   └── *.png                   # Original EDA charts
-│   └── v2_calibrated/             # Final calibrated charts
-│       ├── screenshots/            # Refreshed Power BI screenshots
-│       └── *.png                   # Calibrated EDA charts
-├── dashboard/                      # Power BI file (gitignored — see Drive link)
-├── docs/                           # Documentation
+│   ├── v1_uncalibrated/
+│   └── v2_calibrated/
+│       └── screenshots/
+│
+├── sql/
+│   ├── 01_create_schema.sql
+│   ├── 02_eda_queries.sql
+│   └── 03_powerbi_views.sql
+│
+├── .gitignore
 ├── requirements.txt
 └── README.md
 ```
+
+*The notebook filenames shown with `*` are abbreviated placeholders for the other scripts in the repository.*
+
+---
+
+## Installation and Setup
+
+### Prerequisites
+
+Install the following software before running the project:
+
+- Python 3.11
+- PostgreSQL 17
+- Git
+- Microsoft Power BI Desktop (for dashboard exploration)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Prathmesh717/polisight-insurance-analytics.git
+
+cd polisight-insurance-analytics
+```
+
+### 2. Create a Virtual Environment
+
+```bash
+python3.11 -m venv .venv
+
+source .venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
+python -m pip install --upgrade pip
+
+pip install -r requirements.txt
+```
+
+### 4. Create the PostgreSQL Database
+
+```bash
+createdb polisight
+```
+
+If the database already exists, do not create it again.
+
+### 5. Configure Environment Variables
+
+Create a `.env` file in the project root.
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=polisight
+DB_USER=your_postgres_username
+DB_PASSWORD=your_postgres_password
+
+RESET_DATABASE=true
+```
+
+Replace the database credentials with your local PostgreSQL configuration.
+
+**Security:** Never commit `.env` or database credentials to GitHub. The `.gitignore` file should exclude environment files.
+
+### 6. Create the Database Schema
+
+```bash
+psql -d polisight -f sql/01_create_schema.sql
+```
+
+If your PostgreSQL configuration requires an explicit username or host, provide the relevant connection options.
+
+---
+
+## Running the Pipeline
+
+Execute the scripts in the intended order.
+
+### Step 1: Generate Synthetic Data
+
+```bash
+python notebooks/03_generate_data_v3_final.py
+```
+
+The generator creates synthetic insurance records for the project's relational tables.
+
+After a successful generation run, update the `.env` configuration:
+
+```env
+RESET_DATABASE=false
+```
+
+This prevents subsequent executions from unintentionally resetting the database.
+
+### Step 2: Create Analytical Views
+
+```bash
+psql -d polisight -f sql/03_powerbi_views.sql
+```
+
+### Step 3: Run Exploratory Data Analysis
+
+```bash
+python notebooks/04_eda_visualizations_v2.py
+```
+
+### Step 4: Run Machine Learning Analysis
+
+```bash
+python notebooks/05_ml_analysis_v2.py
+```
+
+**Note:** The commands describe the intended workflow. Script execution, database configuration, generated record counts, and analytical outputs should be verified in the local environment. Some scripts may require configuration adjustments depending on your database setup.
+
+---
+
+## Data Governance and Quality Controls
+
+Data governance is an important component of PoliSight because analytical outputs depend on the quality, consistency, and interpretation of the underlying information.
+
+The project documentation covers:
+
+- Data definitions and business terminology.
+- Primary key and foreign key relationships.
+- Structural database constraints.
+- Data quality expectations.
+- Data validation requirements.
+- Governance control tracking.
+- Evidence-based verification.
+
+### Governance Principles
+
+| Principle | Application |
+|---|---|
+| Data Accuracy | Define validation expectations for important data fields |
+| Data Completeness | Identify required fields and nullability requirements |
+| Data Consistency | Maintain consistent definitions across analytical outputs |
+| Data Integrity | Use relational keys and database constraints |
+| Data Transparency | Document assumptions, definitions, and transformations |
+| Data Security | Exclude credentials and sensitive configuration from version control |
+
+The governance checklist distinguishes between implemented controls, verified controls, and controls that still require work.
+
+**Scope note:** This is a portfolio project using synthetic data. Its governance documentation does not represent formal regulatory certification, production compliance, or an independent audit.
+
+---
+
+## Limitations and Future Improvements
+
+### Current Limitations
+
+1. **Synthetic Data:** The project uses generated insurance records rather than confidential or production insurance datasets.
+2. **Model Generalization:** Machine learning results are specific to the synthetic data-generation assumptions and may not generalize to real insurance portfolios.
+3. **Business Assumptions:** Risk scores, lapse probabilities, claim distributions, and customer lifetime value depend on the implemented assumptions.
+4. **Regulatory Validation:** The platform is not a certified regulatory reporting or compliance solution.
+5. **Reproducibility:** Historical analytical results require execution and validation against the current pipeline before being treated as current results.
+
+**Historical Results:** Historical charts and analysis outputs from the uncalibrated version are retained in `reports/v1_uncalibrated/` for comparison with the calibrated version. Previously reported metrics should be reproduced through the current pipeline before being considered current or independently verified results.
+
+### Future Improvements
+
+- Integrate real-world, appropriately licensed insurance datasets.
+- Develop more robust feature engineering and model validation.
+- Introduce time-based training and testing strategies.
+- Add automated data quality checks.
+- Implement model explainability techniques.
+- Improve dashboard interactivity and drill-down reporting.
+- Add automated database and pipeline testing.
+- Introduce role-based access control.
+- Develop automated reporting and scheduled refresh workflows.
+- Deploy the platform using a cloud-based architecture.
 
 ---
 
 ## Skills Demonstrated
 
-| Skill | Evidence |
+| Skill Category | Skills |
 |---|---|
-| SQL | 7 complex views with CTEs, JOINs, window functions, pre-aggregation pattern |
-| Python | Faker data generation, pandas EDA, matplotlib/seaborn visualization |
-| Data Modeling | Star schema, 8 tables, 3.6M rows, normalized 3NF dimensions |
-| Power BI | 7-page dashboard, DAX measures, cross-page slicers, conditional formatting |
-| DAX | DIVIDE, CALCULATE, COUNTROWS, AVERAGE with filter context |
-| Statistical Analysis | Loss ratio, CLV, lapse rate, renewal cohort, pricing adequacy |
-| Machine Learning | KMeans, Logistic Regression, Random Forest, Linear Regression |
-| Model Evaluation | ROC-AUC, classification report, R², MAE, silhouette score, feature importance |
-| Data Debugging | Identified and fixed fan-out joins, data leakage, and calibration errors |
-| Data Storytelling | Business insights framed for executive and actuarial audience |
-
----
-
-## Next Project
-
-**Project 2 → E-commerce Marketplace Analytics**
-- RFM-based retention intervention model targeting first 30 day drop off
-- Seller risk scoring using historical late rate and volume patterns
-- Executive dashboard in Tableau, operational layer in Looker Studio
-- Stack: Python (scikit-learn), PostgreSQL, Tableau, Looker Studio
+| Programming | Python, Pandas, NumPy |
+| Database | PostgreSQL, SQL, relational modelling |
+| Analytics | EDA, data profiling, statistical analysis |
+| Machine Learning | Classification, clustering, regression, model evaluation |
+| Business Intelligence | Power BI, dashboard reporting, KPI analysis |
+| Business Analysis | BRD, requirements gathering, business rules, acceptance criteria |
+| Quality Assurance | UAT planning, test scenarios, traceability |
+| Data Governance | Data dictionary, data quality, governance controls |
+| Development Tools | Git, GitHub, virtual environments |
 
 ---
 
 ## Author
 
-**Chandan Ram Saii G**  
-[GitHub](https://github.com/ChandanRamSaiiG21) | Data Analyst | Hyderabad, India  
-4 years experience — Insurance domain (Cognizant, BFSI)
+**Prathmesh Aghor**
+
+Computer Engineering Graduate | Data Analytics | Business Analysis | Software Development | Machine Learning
+
+- **GitHub:** [Prathmesh717](https://github.com/Prathmesh717)
+- **Project Repository:** [PoliSight – Insurance Policy Intelligence & Analytics Platform](https://github.com/Prathmesh717/polisight-insurance-analytics)
+
+---
+
+*PoliSight is an independent portfolio project developed for demonstrating practical skills in data analytics, business analysis, SQL, machine learning, data governance, and business intelligence.*
+
