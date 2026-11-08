@@ -638,6 +638,15 @@ Computer Engineering Graduate | Data Analytics | Business Analysis | Software De
 - **Project Repository:** [PoliSight – Insurance Policy Intelligence & Analytics Platform](https://github.com/Prathmesh717/polisight-insurance-analytics)
 
 ---
+## License
+
+This project is licensed under the **MIT License**. You are free to use, modify, distribute, and adapt the software in accordance with the license terms.
+
+See the [LICENSE](LICENSE) file for the complete license text.
+
+Copyright (c) 2026 Prathmesh Aghor.
+
+---
 
 *PoliSight is an independent portfolio project developed for demonstrating practical skills in data analytics, business analysis, SQL, machine learning, data governance, and business intelligence.*
 
