@@ -312,20 +312,40 @@ The dashboard screenshots retained in the repository are available in the follow
 
 ### Dashboard Previews
 
-**Insurance Analytics Dashboard**
+## Power BI Dashboard
 
-![Insurance Analytics Dashboard](reports/v2_calibrated/screenshots/dashboard_overview.png)
+7-page interactive dashboard with slicers (Year, State, Product Line) synced across pages.
 
-**Claims and Premium Analysis**
 
-![Claims and Premium Analysis](reports/v2_calibrated/screenshots/claims_analysis.png)
+### Page 1 — Lapse Trend
+![Lapse Trend](reports/v2_calibrated/screenshots/page1_lapse_trend.png)
+Monthly lapse rate trend 2015-2024 with total policies overlay. Rate fluctuates 16-19%, averaging 17.7%.
 
-**Customer and Renewal Analysis**
+### Page 2 — Loss Ratio by State
+![Loss Ratio](reports/v2_calibrated/screenshots/page2_loss_ratio.png)
+Horizontal bar chart showing loss ratio per state with break-even reference line. Range: 68–71% across all 15 states.
 
-![Customer and Renewal Analysis](reports/v2_calibrated/screenshots/customer_renewal_analysis.png)
+### Page 3 — CLV Distribution
+![CLV](reports/v2_calibrated/screenshots/page3_clv_distribution.png)
+Donut chart - 25.86% negative CLV, 67.71% above ₹30K. Avg CLV ₹86.39K.
 
-*Note: Update the image filenames above if the actual screenshot filenames in the repository differ. The Power BI PBIX file is not included in this repository.*
+### Page 4 — Overview
+![Overview](reports/v2_calibrated/screenshots/page4_overview.png)
+KPI cards: Lapse Rate 17.68%, Renewal Rate 40.67%, Avg Loss Ratio 64.15, Avg CLV ₹13.22K. Renewal rate by product line bar chart.
 
+### Page 5 — Agent Performance Leaderboard
+![Agents](reports/v2_calibrated/screenshots/page5_agent_leaderboard.png)
+Top 20 agents by total premium written with conditional formatting on renewal rate. Top agent: Mitesh Kibe, ₹3.16Cr, 40.23% renewal.
+
+### Page 6 — Pricing Adequacy
+![Pricing](reports/v2_calibrated/screenshots/page6_pricing_adequacy.png)
+Pricing adequacy matrix + loss ratio by product line + risk score vs loss ratio scatter. Motor highest at 86%, Life lowest at 55%.
+
+### Page 7 — Customer Segmentation
+![Segmentation](reports/v2_calibrated/screenshots/page7_customer_segmentation.png)
+Income treemap + customer count by income + lapse rate by education/marital status + gender distribution.
+
+---
 ### Dashboard Analysis Areas
 
 - Policy and customer distribution.
